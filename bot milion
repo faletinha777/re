@@ -1,0 +1,406 @@
+import requests
+import time
+from importlib import reload
+from pickle import NONE
+from sqlite3 import Time
+from bs4 import BeautifulSoup
+import telebot
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.by import By
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+
+# Por informações do seu bot.########
+api_key = '5693643339:AAHQrVCyr-h3iUAtpkQZOv65R0r3xsBqsNQ'  # TOKEN DO SEU BOT
+chat_id = '-1001686762352'  # ID DO CANAL pladix
+#####################################
+bot = telebot.TeleBot(token=api_key)
+
+options = webdriver.ChromeOptions()
+options.add_argument('--headless')
+nav = webdriver.Chrome(service=Service(
+    ChromeDriverManager().install()), chrome_options=options)
+
+nav.get('https://blaze.com/pt/games/double')
+
+analisar = 0
+gale_atual = 0
+analisar_open = 0
+resultsDouble = []
+
+try:
+    bot.send_sticker(chat_id, sticker='CAACAgEAAxkBAAEFrZBjB9mBPVPsy9ipZAz0IfbiDptG4wACMQIAAsOjKEdLBVdiYsQQXykE')
+    bot.send_message(chat_id=chat_id, text=('''
+    🟢 Bot On-Line
+         '''))
+except:
+    print('Informaçãoes do ChatID estão incorretas!')
+    time.sleep(999999)
+
+while True:
+    def qualnum(x):
+        if x == '0':
+            return 0
+
+        if x == '1':
+            return 1
+
+        if x == '2':
+            return 2
+
+        if x == '3':
+            return 3
+
+        if x == '4':
+            return 4
+
+        if x == '5':
+            return 5
+
+        if x == '6':
+            return 6
+
+        if x == '7':
+            return 7
+
+        if x == '8':
+            return 8
+
+        if x == '9':
+            return 9
+
+        if x == '10':
+            return 10
+
+        if x == '11':
+            return 11
+
+        if x == '12':
+            return 12
+
+        if x == '13':
+            return 13
+
+        if x == '14':
+            return 14
+
+
+    def qualcor(x):
+        if x == '0':
+            return 'B'
+
+        if x == '1':
+            return 'V'
+
+        if x == '2':
+            return 'V'
+
+        if x == '3':
+            return 'V'
+
+        if x == '4':
+            return 'V'
+
+        if x == '5':
+            return 'V'
+
+        if x == '6':
+            return 'V'
+
+        if x == '7':
+            return 'V'
+
+        if x == '8':
+            return 'P'
+
+        if x == '9':
+            return 'P'
+
+        if x == '10':
+            return 'P'
+
+        if x == '11':
+            return 'P'
+
+        if x == '12':
+            return 'P'
+
+        if x == '13':
+            return 'P'
+
+        if x == '14':
+            return 'P'
+
+
+    try:
+        resulROOL = nav.find_element(
+            By.XPATH, '//*[@id="roulette-timer"]/div[1]').text
+    except NameError as erro:
+        print(erro)
+        print('ERRO 403')
+    except Exception as erro:
+        print('ERRO 404')
+
+    analisar_open = 0
+    if resulROOL == 'Girando...':
+        analisar_open = 1
+        print('Analisando')
+        time.sleep(13)
+        c = nav.page_source
+        resultsDouble.clear()
+
+        soup = BeautifulSoup(c, 'html.parser')
+        go = soup.find('div', class_="entries main")
+        for i in go:
+            if i.getText():
+                resultsDouble.append(i.getText())
+            else:
+                resultsDouble.append('0')
+
+        resultsDouble = resultsDouble[:-1]
+
+        if analisar_open == 1:
+
+            default = resultsDouble[0:3]
+
+            mapeando = map(qualnum, default)
+            mapeando2 = map(qualcor, default)
+            finalnum = list(mapeando)
+            finalcor = list(mapeando2)
+
+
+            def BUTTON_LINK():
+                markup = InlineKeyboardMarkup()
+                markup.row_width = 2
+                markup.add(InlineKeyboardButton(text="APOSTE AQUI", url="https://blaze.com/pt/games/double"))
+                return markup
+
+
+            def CHECK_VERSION(num):
+                global analisar
+                global gale_atual
+
+                if analisar == 0:
+                    if num == ['V', 'V', 'P']:
+                        analisar = 1
+                        bot.send_message(chat_id=chat_id, text='''
+➖➖➖➖➖➖➖➖➖
+ENTRADA: ⚫️ PRETO 
+
+PROTEÇÃO NO BRANCO
+
+📍GALE2 OPCIONAL                      
+                        ''')
+                        return
+                    if num == ['P', 'P', 'V']:
+                        analisar = 1
+                        bot.send_message(chat_id=chat_id, text='''
+➖➖➖➖➖➖➖➖➖
+ENTRADA: 🛑 VERMELHO 
+
+PROTEÇÃO NO BRANCO
+
+📍GALE2 OPCIONAL
+                        ''')
+                        return
+
+                elif analisar == 1:
+
+                    if gale_atual == 0:
+                        # WIN    #['X','V', 'V']: manda sinal
+                        if num == ['P', 'V', 'V']:
+                            analisar = 0
+                            gale_atual = 0
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTJdjGWJW0ddowpuNpaJPtW5vHzun0wAC0QAD7EWAR6BQIQgy2mgWKQQ')  # win
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTRpjGm4fEyOurEueAwnPUrBaI830tAACuwADeTtRC1Cww33riXe_KQQ')
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTHNjGU-2AnXeW-3ZchDdT1d6MhxRYgAC6AEAAu9iQEcdP6tgwPFxGCkE',
+                                             reply_markup=BUTTON_LINK())
+                            return
+                        if num == ['V', 'P', 'P']:
+                            analisar = 0
+                            gale_atual = 0
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTJdjGWJW0ddowpuNpaJPtW5vHzun0wAC0QAD7EWAR6BQIQgy2mgWKQQ')  # win
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTRpjGm4fEyOurEueAwnPUrBaI830tAACuwADeTtRC1Cww33riXe_KQQ')
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTHNjGU-2AnXeW-3ZchDdT1d6MhxRYgAC6AEAAu9iQEcdP6tgwPFxGCkE',
+                                             reply_markup=BUTTON_LINK())
+                            return
+                        if num == ['B', 'V', 'V']:
+                            analisar = 0
+                            gale_atual = 0
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTKNjGWXL_PYiqaxjYdihhe-LIHOavwACTQEAApm4MUSINMxm4AxWAykE')  # branco win
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTRJjGm0n08uix6wuMn-BkybGBTu7TAACLQEAAmBveEelGZ3x9j49yCkE')
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTRpjGm4fEyOurEueAwnPUrBaI830tAACuwADeTtRC1Cww33riXe_KQQ')
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTHNjGU-2AnXeW-3ZchDdT1d6MhxRYgAC6AEAAu9iQEcdP6tgwPFxGCkE',
+                                             reply_markup=BUTTON_LINK())
+                            return
+                        if num == ['B', 'P', 'P']:
+                            analisar = 0
+                            gale_atual = 0
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTKNjGWXL_PYiqaxjYdihhe-LIHOavwACTQEAApm4MUSINMxm4AxWAykE')  # branco win
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTRJjGm0n08uix6wuMn-BkybGBTu7TAACLQEAAmBveEelGZ3x9j49yCkE')
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTRpjGm4fEyOurEueAwnPUrBaI830tAACuwADeTtRC1Cww33riXe_KQQ')
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTHNjGU-2AnXeW-3ZchDdT1d6MhxRYgAC6AEAAu9iQEcdP6tgwPFxGCkE',
+                                             reply_markup=BUTTON_LINK())
+                            return
+
+                        if num == ['V', 'V', 'V']:
+                            gale_atual = gale_atual + 1
+                            bot.send_message(chat_id=chat_id, text='''
+Vamos para o GALE 1
+                        ''')
+                            return
+                        if num == ['P', 'P', 'P']:
+                            gale_atual = gale_atual + 1
+                            bot.send_message(chat_id=chat_id, text='''
+Vamos para o GALE 1
+                        ''')
+                            return
+
+                    if gale_atual == 1:
+                        if num == ['P', 'V', 'V']:
+                            analisar = 0
+                            gale_atual = 0
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTJ9jGWJcNx8d92oecYuU06fwu-AE3wAC_AADQSaBR11zLQEy5HO0KQQ')  # win gale 1
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTRpjGm4fEyOurEueAwnPUrBaI830tAACuwADeTtRC1Cww33riXe_KQQ')
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTHNjGU-2AnXeW-3ZchDdT1d6MhxRYgAC6AEAAu9iQEcdP6tgwPFxGCkE',
+                                             reply_markup=BUTTON_LINK())
+                            return
+                        if num == ['V', 'P', 'P']:
+                            analisar = 0
+                            gale_atual = 0
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTJ9jGWJcNx8d92oecYuU06fwu-AE3wAC_AADQSaBR11zLQEy5HO0KQQ')  # win gale 1
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTRpjGm4fEyOurEueAwnPUrBaI830tAACuwADeTtRC1Cww33riXe_KQQ')
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTHNjGU-2AnXeW-3ZchDdT1d6MhxRYgAC6AEAAu9iQEcdP6tgwPFxGCkE',
+                                             reply_markup=BUTTON_LINK())
+                            return
+                        if num == ['B', 'V', 'V']:
+                            analisar = 0
+                            gale_atual = 0
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTKNjGWXL_PYiqaxjYdihhe-LIHOavwACTQEAApm4MUSINMxm4AxWAykE')  # branco gale 1
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTRpjGm4fEyOurEueAwnPUrBaI830tAACuwADeTtRC1Cww33riXe_KQQ')
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTHNjGU-2AnXeW-3ZchDdT1d6MhxRYgAC6AEAAu9iQEcdP6tgwPFxGCkE',
+                                             reply_markup=BUTTON_LINK())
+                            return
+                        if num == ['B', 'P', 'P']:
+                            analisar = 0
+                            gale_atual = 0
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTKNjGWXL_PYiqaxjYdihhe-LIHOavwACTQEAApm4MUSINMxm4AxWAykE')  # branco gale 1
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTRpjGm4fEyOurEueAwnPUrBaI830tAACuwADeTtRC1Cww33riXe_KQQ')
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTHNjGU-2AnXeW-3ZchDdT1d6MhxRYgAC6AEAAu9iQEcdP6tgwPFxGCkE',
+                                             reply_markup=BUTTON_LINK())
+                            return
+
+                        if num == ['V', 'V', 'V']:
+                            gale_atual = gale_atual + 1
+                            bot.send_message(chat_id=chat_id, text='''
+Vamos para o GALE 2
+                        ''')
+                            return
+                        if num == ['P', 'P', 'P']:
+                            gale_atual = gale_atual + 1
+                            bot.send_message(chat_id=chat_id, text='''
+Vamos para o GALE 2
+                        ''')
+                            return
+
+                    if gale_atual == 2:
+                        if num == ['P', 'V', 'V']:
+                            analisar = 0
+                            gale_atual = 0
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTJ9jGWJcNx8d92oecYuU06fwu-AE3wAC_AADQSaBR11zLQEy5HO0KQQ')  # win gale 2
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTRpjGm4fEyOurEueAwnPUrBaI830tAACuwADeTtRC1Cww33riXe_KQQ')
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTHNjGU-2AnXeW-3ZchDdT1d6MhxRYgAC6AEAAu9iQEcdP6tgwPFxGCkE',
+                                             reply_markup=BUTTON_LINK())
+                            return
+                        if num == ['V', 'P', 'P']:
+                            analisar = 0
+                            gale_atual = 0
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTJ9jGWJcNx8d92oecYuU06fwu-AE3wAC_AADQSaBR11zLQEy5HO0KQQ')  # win gale 2
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTRpjGm4fEyOurEueAwnPUrBaI830tAACuwADeTtRC1Cww33riXe_KQQ')
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTHNjGU-2AnXeW-3ZchDdT1d6MhxRYgAC6AEAAu9iQEcdP6tgwPFxGCkE',
+                                             reply_markup=BUTTON_LINK())
+                            return
+                        if num == ['B', 'V', 'V']:
+                            analisar = 0
+                            gale_atual = 0
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTKNjGWXL_PYiqaxjYdihhe-LIHOavwACTQEAApm4MUSINMxm4AxWAykE')  # branco gale 2
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTRpjGm4fEyOurEueAwnPUrBaI830tAACuwADeTtRC1Cww33riXe_KQQ')
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTHNjGU-2AnXeW-3ZchDdT1d6MhxRYgAC6AEAAu9iQEcdP6tgwPFxGCkE',
+                                             reply_markup=BUTTON_LINK())
+                            return
+                        if num == ['B', 'P', 'P']:
+                            analisar = 0
+                            gale_atual = 0
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTKNjGWXL_PYiqaxjYdihhe-LIHOavwACTQEAApm4MUSINMxm4AxWAykE')  # branco gale 2
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTRpjGm4fEyOurEueAwnPUrBaI830tAACuwADeTtRC1Cww33riXe_KQQ')
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTHNjGU-2AnXeW-3ZchDdT1d6MhxRYgAC6AEAAu9iQEcdP6tgwPFxGCkE',
+                                             reply_markup=BUTTON_LINK())
+                            return
+
+                        if num == ['V', 'V', 'V']:
+                            analisar = 0
+                            gale_atual = 0
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTJtjGWJZrG5rw9Tb07oaW6YsYOe42QACwgADBwZ4R-x01YRnl1K1KQQ')  # loss
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTRpjGm4fEyOurEueAwnPUrBaI830tAACuwADeTtRC1Cww33riXe_KQQ')
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTHNjGU-2AnXeW-3ZchDdT1d6MhxRYgAC6AEAAu9iQEcdP6tgwPFxGCkE',
+                                             reply_markup=BUTTON_LINK())
+                            return
+                        if num == ['P', 'P', 'P']:
+                            analisar = 0
+                            gale_atual = 0
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTJtjGWJZrG5rw9Tb07oaW6YsYOe42QACwgADBwZ4R-x01YRnl1K1KQQ')  # loss
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTRpjGm4fEyOurEueAwnPUrBaI830tAACuwADeTtRC1Cww33riXe_KQQ')
+                            bot.send_sticker(chat_id,
+                                             sticker='CAACAgEAAxkBAAEBTHNjGU-2AnXeW-3ZchDdT1d6MhxRYgAC6AEAAu9iQEcdP6tgwPFxGCkE',
+                                             reply_markup=BUTTON_LINK())
+                            return
+
+
+            checkVersion = CHECK_VERSION(finalcor)
+            print(checkVersion)
